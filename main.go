@@ -1,10 +1,13 @@
 package main
 
 import (
+	"courses-info/client"
 	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
+)
+
+const (
+	baseAPIURL = "https://developers.teachable.com/v1"
 )
 
 type Course struct {
@@ -40,8 +43,6 @@ type PublishedCourse struct {
 }
 
 func main() {
-
-	var users []UserData
 	var courses []PublishedCourse
 
 	allCourses := getCourses()
@@ -49,10 +50,9 @@ func main() {
 
 	for _, course := range publishedCourses {
 		enrolledUsers := getEnrolledUsersIDByCourse(course.ID)
-		for _, user := range enrolledUsers.Users {
-			users = append(users, getUserData(user.ID))
-		}
-		course := PublishedCourse{Name: course.Name, Heading: course.Heading, Users: users}
+		usersByCourse := getUsersByCourse(enrolledUsers)
+
+		course := PublishedCourse{Name: course.Name, Heading: course.Heading, Users: usersByCourse}
 		courses = append(courses, course)
 	}
 
@@ -60,21 +60,18 @@ func main() {
 	fmt.Println(string(coursesJSON))
 }
 
-func getCourses() Courses {
-	url := "https://developers.teachable.com/v1/courses"
-
-	req, _ := http.NewRequest("GET", url, nil)
-
-	req.Header.Add("accept", "application/json")
-	req.Header.Add("apiKey", "7JbSA3ep6XOMV3t8t7QXuXq9HS79Dwnr")
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		fmt.Println(err)
+func getUsersByCourse(enrolledUsers Users) []UserData {
+	var users []UserData
+	for _, user := range enrolledUsers.Users {
+		users = append(users, getUserData(user.ID))
 	}
+	return users
+}
 
-	defer resp.Body.Close()
-	body, _ := io.ReadAll(resp.Body)
+func getCourses() Courses {
+	url := fmt.Sprintf("%s/courses", baseAPIURL)
+
+	body, _ := client.DoRequest(url)
 
 	var courses Courses
 	json.Unmarshal(body, &courses)
@@ -93,17 +90,10 @@ func getPublishedCourses(allCourses Courses) []Course {
 }
 
 func getEnrolledUsersIDByCourse(courseID int) Users {
-	url := fmt.Sprintf("https://developers.teachable.com/v1/courses/%d/enrollments", courseID)
+	url := fmt.Sprintf("%s/courses/%d/enrollments", baseAPIURL, courseID)
 
-	req, _ := http.NewRequest("GET", url, nil)
-
-	req.Header.Add("accept", "application/json")
-	req.Header.Add("apiKey", "7JbSA3ep6XOMV3t8t7QXuXq9HS79Dwnr")
-
-	res, _ := http.DefaultClient.Do(req)
-
-	defer res.Body.Close()
-	body, _ := io.ReadAll(res.Body)
+	body, _ := client.DoRequest(url)
+	//tratar erro
 
 	var users Users
 	json.Unmarshal(body, &users)
@@ -112,17 +102,9 @@ func getEnrolledUsersIDByCourse(courseID int) Users {
 }
 
 func getUserData(userID int) UserData {
-	url := fmt.Sprintf("https://developers.teachable.com/v1/users/%d", userID)
+	url := fmt.Sprintf("%s/users/%d", baseAPIURL, userID)
 
-	req, _ := http.NewRequest("GET", url, nil)
-
-	req.Header.Add("accept", "application/json")
-	req.Header.Add("apiKey", "7JbSA3ep6XOMV3t8t7QXuXq9HS79Dwnr")
-
-	res, _ := http.DefaultClient.Do(req)
-
-	defer res.Body.Close()
-	body, _ := io.ReadAll(res.Body)
+	body, _ := client.DoRequest(url)
 
 	var userData UserData
 	json.Unmarshal(body, &userData)
