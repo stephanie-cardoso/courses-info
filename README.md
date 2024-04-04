@@ -13,7 +13,7 @@ course within your school:
 ● Course heading
 ● A list of the names and emails of students actively enrolled in the course
 
-### Desireble JSON struct
+### Desired JSON struct
 
 ```
 "Name": "Golang do zero",
