@@ -12,3 +12,25 @@ course within your school:
 ● Course name
 ● Course heading
 ● A list of the names and emails of students actively enrolled in the course
+
+### Desireble JSON struct
+
+```
+"Name": "Golang do zero",
+"Heading": "Curso de Golang para iniciantes",
+Alunos: [
+    {
+    	"Name": "Stephanie",
+    	"Email": "steph@email.com",
+    },
+    {
+    	"Name": "Bento",
+    	"Email": "bento@email.com",
+    },
+    {
+    	"Name": "Aluno1",
+    	"Email": "aluno1@email.com",
+    }
+]
+```
+
